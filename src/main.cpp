@@ -1,4 +1,6 @@
 // Copyright 2022 NNTU-CS
+#include "tree.h"
+
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -7,8 +9,6 @@
 #include <random>
 #include <string>
 #include <vector>
-
-#include "tree.h"
 
 uint64_t factorial(int n) {
   if (n <= 1) return 1;
