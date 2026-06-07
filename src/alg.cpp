@@ -1,149 +1,150 @@
-// Copyright 2022 NNTU-CS
 #include <vector>
 
 #include "tree.h"
 
 
 PMTreeNode::~PMTreeNode() {
-  for (auto kid : children) {
-    delete kid;
-  }
+    for (auto child : children) {
+        delete child;
+    }
 }
 
-void PMTree::build(PMTreeNode* node, const std::vector<char>& items) {
-  if (items.empty()) return;
+void PMTree::buildTree(PMTreeNode* node,
+                       const std::vector<char>& available) {
+    if (available.empty()) return;
 
-  for (char c : items) {
-    PMTreeNode* kid = new PMTreeNode(c);
-    node->children.push_back(kid);
+    for (char c : available) {
+        PMTreeNode* child = new PMTreeNode(c);
+        node->children.push_back(child);
 
-    std::vector<char> rest;
-    for (char x : items) {
-      if (x != c) rest.push_back(x);
+        std::vector<char> remaining;
+        for (char elem : available) {
+            if (elem != c) {
+                remaining.push_back(elem);
+            }
+        }
+
+        buildTree(child, remaining);
     }
-
-    build(kid, rest);
-  }
 }
 
-PMTree::PMTree(const std::vector<char>& chars) {
-  for (char c : chars) {
-    PMTreeNode* nd = new PMTreeNode(c);
-    roots.push_back(nd);
+PMTree::PMTree(const std::vector<char>& elements) {
+    for (char c : elements) {
+        PMTreeNode* root = new PMTreeNode(c);
+        roots.push_back(root);
 
-    std::vector<char> rest;
-    for (char x : chars) {
-      if (x != c) rest.push_back(x);
+        std::vector<char> remaining;
+        for (char elem : elements) {
+            if (elem != c) {
+                remaining.push_back(elem);
+            }
+        }
+        buildTree(root, remaining);
     }
-
-    build(nd, rest);
-  }
 }
 
 PMTree::~PMTree() {
-  for (auto nd : roots) {
-    delete nd;
-  }
-}
-
-namespace {
-
-void collect(PMTreeNode* nd, std::vector<char>* cur,
-             std::vector<std::vector<char>>* out) {
-  if (!nd) return;
-
-  cur->push_back(nd->value);
-
-  if (nd->children.empty()) {
-    out->push_back(*cur);
-  } else {
-    for (auto kid : nd->children) {
-      collect(kid, cur, out);
+    for (auto root : roots) {
+        delete root;
     }
-  }
-
-  cur->pop_back();
 }
 
-int countLeaves(PMTreeNode* nd) {
-  if (!nd) return 0;
-  if (nd->children.empty()) return 1;
+void collectAllPerms(PMTreeNode* node, std::vector<char>& current,
+                     std::vector<std::vector<char>>& result) {
+    if (!node) return;
 
-  int sum = 0;
-  for (auto kid : nd->children) {
-    sum += countLeaves(kid);
-  }
-  return sum;
+    current.push_back(node->value);
+
+    if (node->children.empty()) {
+        result.push_back(current);
+    } else {
+        for (auto child : node->children) {
+            collectAllPerms(child, current, result);
+        }
+    }
+
+    current.pop_back();
 }
-
-}  // namespace
 
 std::vector<std::vector<char>> getAllPerms(const PMTree& tree) {
-  std::vector<std::vector<char>> res;
-  std::vector<char> cur;
+    std::vector<std::vector<char>> result;
+    std::vector<char> current;
 
-  for (auto nd : tree.getRoots()) {
-    collect(nd, &cur, &res);
-  }
-
-  return res;
-}
-
-std::vector<char> getPerm1(PMTree& tree, int n) {
-  if (n <= 0) return {};
-
-  auto all = getAllPerms(tree);
-
-  if (static_cast<size_t>(n) > all.size()) return {};
-
-  return all[n - 1];
-}
-
-std::vector<char> getPerm2(PMTree& tree, int n) {
-  if (n <= 0) return {};
-
-  const auto& rootsList = tree.getRoots();
-  if (rootsList.empty()) return {};
-
-  int acc = 0;
-  PMTreeNode* cur = nullptr;
-
-  for (auto nd : rootsList) {
-    int sz = countLeaves(nd);
-    if (acc + sz >= n) {
-      cur = nd;
-      break;
-    }
-    acc += sz;
-  }
-
-  if (!cur) return {};
-
-  std::vector<char> res;
-  int idx = n - acc;
-
-  while (cur) {
-    res.push_back(cur->value);
-
-    if (cur->children.empty()) break;
-
-    acc = 0;
-    PMTreeNode* next = nullptr;
-
-    for (auto kid : cur->children) {
-      int sz = countLeaves(kid);
-      if (acc + sz >= idx) {
-        next = kid;
-        break;
-      }
-      acc += sz;
+    for (auto root : tree.getRoots()) {
+        collectAllPerms(root, current, result);
     }
 
-    if (!next) return {};
+    return result;
+}
 
-    idx -= acc;
-    cur = next;
-  }
+std::vector<char> getPerm1(PMTree& tree, int num) {
+    if (num <= 0) return {};
 
-  return res;
+    auto allPerms = getAllPerms(tree);
+
+    if (num > static_cast<int>(allPerms.size())) {
+        return {};
+    }
+
+    return allPerms[num - 1];
+}
+
+int countLeaves(PMTreeNode* node) {
+    if (!node) return 0;
+    if (node->children.empty()) return 1;
+
+    int count = 0;
+    for (auto child : node->children) {
+        count += countLeaves(child);
+    }
+    return count;
+}
+
+std::vector<char> getPerm2(PMTree& tree, int num) {
+    if (num <= 0) return {};
+
+    const auto& roots = tree.getRoots();
+    if (roots.empty()) return {};
+
+    int cumulative = 0;
+    PMTreeNode* current = nullptr;
+
+    for (auto root : roots) {
+        int leavesInSubtree = countLeaves(root);
+        if (cumulative + leavesInSubtree >= num) {
+            current = root;
+            break;
+        }
+        cumulative += leavesInSubtree;
+    }
+
+    if (!current) return {};
+
+    std::vector<char> result;
+    int targetNum = num - cumulative;
+
+    while (current) {
+        result.push_back(current->value);
+
+        if (current->children.empty()) break;
+
+        cumulative = 0;
+        PMTreeNode* next = nullptr;
+
+        for (auto child : current->children) {
+            int leavesInSubtree = countLeaves(child);
+            if (cumulative + leavesInSubtree >= targetNum) {
+                next = child;
+                break;
+            }
+            cumulative += leavesInSubtree;
+        }
+
+        if (!next) return {};
+
+        targetNum -= cumulative;
+        current = next;
+    }
+
+    return result;
 }
