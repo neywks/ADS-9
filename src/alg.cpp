@@ -3,6 +3,7 @@
 
 #include "tree.h"
 
+
 PMTreeNode::~PMTreeNode() {
   for (auto kid : children) {
     delete kid;
