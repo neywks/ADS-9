@@ -29,7 +29,7 @@ int generateRandomPermNumber(int n) {
 }
 
 int main() {
-std::vector<int> n_values = {2, 3, 4, 5, 6};
+  std::vector<int> n_values = {2, 3, 4, 5, 6};
   int num_trials = 5;
 
   std::vector<double> n_list;
