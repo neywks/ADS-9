@@ -1,6 +1,5 @@
 // Copyright 2022 NNTU-CS
 #include <chrono>
-#include <cstdint>
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
