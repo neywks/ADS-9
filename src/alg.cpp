@@ -46,8 +46,10 @@ PMTree::~PMTree() {
   }
 }
 
-static void collect(PMTreeNode* nd, std::vector<char>* cur,
-                    std::vector<std::vector<char>>* out) {
+namespace {
+
+void collect(PMTreeNode* nd, std::vector<char>* cur,
+             std::vector<std::vector<char>>* out) {
   if (!nd) return;
 
   cur->push_back(nd->value);
@@ -62,6 +64,19 @@ static void collect(PMTreeNode* nd, std::vector<char>* cur,
 
   cur->pop_back();
 }
+
+int countLeaves(PMTreeNode* nd) {
+  if (!nd) return 0;
+  if (nd->children.empty()) return 1;
+
+  int sum = 0;
+  for (auto kid : nd->children) {
+    sum += countLeaves(kid);
+  }
+  return sum;
+}
+
+}  // namespace
 
 std::vector<std::vector<char>> getAllPerms(const PMTree& tree) {
   std::vector<std::vector<char>> res;
@@ -82,17 +97,6 @@ std::vector<char> getPerm1(PMTree& tree, int n) {
   if (static_cast<size_t>(n) > all.size()) return {};
 
   return all[n - 1];
-}
-
-static int countLeaves(PMTreeNode* nd) {
-  if (!nd) return 0;
-  if (nd->children.empty()) return 1;
-
-  int sum = 0;
-  for (auto kid : nd->children) {
-    sum += countLeaves(kid);
-  }
-  return sum;
 }
 
 std::vector<char> getPerm2(PMTree& tree, int n) {
