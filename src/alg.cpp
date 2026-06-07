@@ -1,7 +1,7 @@
 // Copyright 2022 NNTU-CS
-#include "tree.h"
-
 #include <vector>
+
+#include "tree.h"
 
 PMTreeNode::~PMTreeNode() {
   for (auto kid : children) {
