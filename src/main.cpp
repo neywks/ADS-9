@@ -10,6 +10,7 @@
 
 #include "tree.h"
 
+
 uint64_t factorial(int n) {
   if (n <= 1) return 1;
   uint64_t result = 1;
